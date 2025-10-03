@@ -10,7 +10,6 @@ function App() {
       <Routes>
         <Route path="/" element={<Login />} />
         <Route path="/dashboard" element={<Dashboard />} />
-        {/* default: nëse s’ka faqe → kthe Login */}
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </BrowserRouter>
