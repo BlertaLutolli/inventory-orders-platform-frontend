@@ -1,57 +1,64 @@
-import  { useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../services/api";
 
-export defaut function Login(){
-    const [username, setUsername] = useState("");
-    const [password, setPassword] = useState("")
-    const navigate = useNavigate();
+export default function Login() {
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
 
-
-    const handleSubmi =async (e : React.FormEvent )
-=> 
-    {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    try{
-        const res =await api.post("/auth/login" , { username ,password });
-        localStorage.setItem("token",res.data.token);
-        navigate("/dashboard");
-    }
-    catch{
-        alert("Invalid credentials");
+    setError("");
+    try {
+      // thirr API backend
+      const res = await api.post("/auth/login", { username, password });
 
-    }
-    };
+      // ruaj tokenin në localStorage
+      localStorage.setItem("token", res.data.token);
 
-
-    return (
-        <div className="h-screen flex items-center justify-center bg-gray-100">
-          <form
-            onSubmit={handleSubmit}
-            className="bg-white p-8 shadow-md rounded w-96 space-y-4"
-          >
-            <h2 className="text-2xl font-bold text-center">Login</h2>
-            <input
-              type="text"
-              placeholder="Username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              className="w-full border p-2 rounded"
-            />
-            <input
-              type="password"
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full border p-2 rounded"
-            />
-            <button
-              type="submit"
-              className="w-full bg-blue-500 text-white p-2 rounded"
-            >
-              Login
-            </button>
-          </form>
-        </div>
-      );
+      // ridrejto në dashboard
+      navigate("/dashboard");
+    } catch (err: any) {
+      console.error("Login error:", err);
+      setError("Invalid username or password!");
     }
+  };
+
+  return (
+    <div className="h-screen flex items-center justify-center bg-gray-100">
+      <form
+        onSubmit={handleSubmit}
+        className="bg-white p-8 shadow-md rounded w-96 space-y-4"
+      >
+        <h2 className="text-2xl font-bold text-center">Login</h2>
+
+        {error && <p className="text-red-500 text-center">{error}</p>}
+
+        <input
+          type="text"
+          placeholder="Username"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          className="w-full border p-2 rounded"
+        />
+
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          className="w-full border p-2 rounded"
+        />
+
+        <button
+          type="submit"
+          className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600"
+        >
+          Login
+        </button>
+      </form>
+    </div>
+  );
+}
