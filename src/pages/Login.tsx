@@ -12,11 +12,9 @@ export default function Login() {
     e.preventDefault();
     setError("");
     try {
-      // thirr API backend
-      const res = await api.post("/auth/login", { username, password });
-
-      // ruaj tokenin në localStorage
-      localStorage.setItem("token", res.data.token);
+        const res = await api.post<any>("/auth/login", { username, password });
+        localStorage.setItem("token", res.data.token);
+        
 
       // ridrejto në dashboard
       navigate("/dashboard");
