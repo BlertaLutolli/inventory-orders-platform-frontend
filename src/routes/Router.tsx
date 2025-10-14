@@ -8,60 +8,78 @@ import CatalogIndex from '../pages/catalog/Index';
 import OrdersIndex from '../pages/orders/Index';
 import Settings from '../pages/Settings';
 import Tenants from '../pages/Tenants';
+import { RequireAuth, RequireRole } from './guards';
 
 const AppRouter: React.FC = () => {
   return (
     <HashRouter>
       <Routes>
+        {/* public */}
         <Route path="/login" element={<Login />} />
+
+        {/* private */}
         <Route
           path="/"
           element={
-            <AppLayout>
-              <Dashboard />
-            </AppLayout>
+            <RequireAuth>
+              <AppLayout>
+                <Dashboard />
+              </AppLayout>
+            </RequireAuth>
           }
         />
         <Route
           path="/dashboard"
           element={
-            <AppLayout>
-              <Dashboard />
-            </AppLayout>
+            <RequireAuth>
+              <AppLayout>
+                <Dashboard />
+              </AppLayout>
+            </RequireAuth>
           }
         />
         <Route
           path="/catalog/*"
           element={
-            <AppLayout>
-              <CatalogIndex />
-            </AppLayout>
+            <RequireAuth>
+              <AppLayout>
+                <CatalogIndex />
+              </AppLayout>
+            </RequireAuth>
           }
         />
         <Route
           path="/orders/*"
           element={
-            <AppLayout>
-              <OrdersIndex />
-            </AppLayout>
-          }
-        />
-        <Route
-          path="/settings"
-          element={
-            <AppLayout>
-              <Settings />
-            </AppLayout>
+            <RequireAuth>
+              <AppLayout>
+                <OrdersIndex />
+              </AppLayout>
+            </RequireAuth>
           }
         />
         <Route
           path="/tenants"
           element={
-            <AppLayout>
-              <Tenants />
-            </AppLayout>
+            <RequireAuth>
+              <AppLayout>
+                <Tenants />
+              </AppLayout>
+            </RequireAuth>
           }
         />
+        {/* admin-only */}
+        <Route
+          path="/settings"
+          element={
+            <RequireRole role="Admin">
+              <AppLayout>
+                <Settings />
+              </AppLayout>
+            </RequireRole>
+          }
+        />
+
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Routes>
     </HashRouter>
