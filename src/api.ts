@@ -1,7 +1,26 @@
 import { getSession } from './context/sessionStore';
 import { notify } from './utils/events';
+import { getTenantId } from './context/tenantStore'; 
 
 const baseURL = import.meta.env.VITE_API_BASE_URL || '';
+
+async function request<T>(path: string, method: HttpMethod, body?: unknown, opts?: RequestInit, attempt = 0): Promise<T> {
+  const session = getSession();
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    ...(opts?.headers as Record<string, string> | undefined),
+  };
+  if (session?.accessToken) headers['Authorization'] = `Bearer ${session.accessToken}`;
+
+  const tenantId = getTenantId();                 
+  if (tenantId) headers['X-Tenant-Id'] = tenantId; 
+
+  const res = await fetch(`${baseURL}${path}`, {
+    method,
+    headers,
+    body: body ? JSON.stringify(body) : undefined,
+    ...opts,
+  });
 
 type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 
