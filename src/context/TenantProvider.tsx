@@ -26,7 +26,7 @@ export const TenantProvider: React.FC<React.PropsWithChildren> = ({ children }) 
         const list = await tenantApi.list();
         setTenants(list);
         // If persisted tenant no longer valid, clear it.
-        if (tenantId && !list.some(t => t.id === tenantId)) {
+        if (tenantId && !list.some((t: { id: string; }) => t.id === tenantId)) {
           setTenantIdState(null);
           setTenantId(null);
         }
