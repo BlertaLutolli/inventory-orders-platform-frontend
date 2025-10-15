@@ -31,8 +31,8 @@ const ProductsPage: React.FC = () => {
   const columns: Column<Product>[] = useMemo(() => ([
     { key: 'name', title: 'Name', sortable: true },
     { key: 'sku', title: 'SKU', sortable: true },
-    { key: 'categoryId', title: 'Category', render: (r) => cats?.find(c => c.id === r.categoryId)?.name || '—' },
-    { key: 'uomId', title: 'UoM', render: (r) => uoms?.find(u => u.id === r.uomId)?.code || '—' },
+    { key: 'categoryId', title: 'Category', render: (r) => cats?.find((c: { id: string; }) => c.id === r.categoryId)?.name || '—' },
+    { key: 'uomId', title: 'UoM', render: (r) => uoms?.find((u: { id: string; }) => u.id === r.uomId)?.code || '—' },
     { key: 'createdAt', title: 'Created', sortable: true, render: (r) => new Date(r.createdAt).toLocaleString() },
     { key: 'id', title: 'Actions', align: 'right', render: (r) => (
       <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>

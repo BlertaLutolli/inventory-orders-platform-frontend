@@ -30,7 +30,7 @@ const VariantsPage: React.FC = () => {
   const columns: Column<Variant>[] = useMemo(() => ([
     { key: 'name', title: 'Name', sortable: true },
     { key: 'sku', title: 'SKU', sortable: true },
-    { key: 'productId', title: 'Product', render: (r) => prods?.find(p => p.id === r.productId)?.name || '—' },
+    { key: 'productId', title: 'Product', render: (r) => prods?.find((p: { id: string; }) => p.id === r.productId)?.name || '—' },
     { key: 'createdAt', title: 'Created', sortable: true, render: (r) => new Date(r.createdAt).toLocaleString() },
     { key: 'id', title: 'Actions', align: 'right', render: (r) => (
       <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
