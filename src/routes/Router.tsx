@@ -8,7 +8,9 @@ import CatalogIndex from '../pages/catalog/Index';
 import OrdersIndex from '../pages/orders/Index';
 import Settings from '../pages/Settings';
 import Tenants from '../pages/Tenants';
+
 import { RequireAuth, RequireRole } from './guards';
+import { RequireTenant } from './tenantGuard'; // ⬅️ NEW
 
 const AppRouter: React.FC = () => {
   return (
@@ -16,15 +18,20 @@ const AppRouter: React.FC = () => {
       <Routes>
         {/* public */}
         <Route path="/login" element={<Login />} />
+        <Route path="/tenants" element={
+          <RequireAuth>
+            <AppLayout><Tenants /></AppLayout>
+          </RequireAuth>
+        } />
 
-        {/* private */}
+        {/* private + tenant required */}
         <Route
           path="/"
           element={
             <RequireAuth>
-              <AppLayout>
-                <Dashboard />
-              </AppLayout>
+              <RequireTenant>
+                <AppLayout><Dashboard /></AppLayout>
+              </RequireTenant>
             </RequireAuth>
           }
         />
@@ -32,9 +39,9 @@ const AppRouter: React.FC = () => {
           path="/dashboard"
           element={
             <RequireAuth>
-              <AppLayout>
-                <Dashboard />
-              </AppLayout>
+              <RequireTenant>
+                <AppLayout><Dashboard /></AppLayout>
+              </RequireTenant>
             </RequireAuth>
           }
         />
@@ -42,9 +49,9 @@ const AppRouter: React.FC = () => {
           path="/catalog/*"
           element={
             <RequireAuth>
-              <AppLayout>
-                <CatalogIndex />
-              </AppLayout>
+              <RequireTenant>
+                <AppLayout><CatalogIndex /></AppLayout>
+              </RequireTenant>
             </RequireAuth>
           }
         />
@@ -52,30 +59,19 @@ const AppRouter: React.FC = () => {
           path="/orders/*"
           element={
             <RequireAuth>
-              <AppLayout>
-                <OrdersIndex />
-              </AppLayout>
+              <RequireTenant>
+                <AppLayout><OrdersIndex /></AppLayout>
+              </RequireTenant>
             </RequireAuth>
           }
         />
-        <Route
-          path="/tenants"
-          element={
-            <RequireAuth>
-              <AppLayout>
-                <Tenants />
-              </AppLayout>
-            </RequireAuth>
-          }
-        />
-        {/* admin-only */}
         <Route
           path="/settings"
           element={
             <RequireRole role="Admin">
-              <AppLayout>
-                <Settings />
-              </AppLayout>
+              <RequireTenant>
+                <AppLayout><Settings /></AppLayout>
+              </RequireTenant>
             </RequireRole>
           }
         />
