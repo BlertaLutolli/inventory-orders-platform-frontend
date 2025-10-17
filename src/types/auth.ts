@@ -1,4 +1,4 @@
-export type Role = 'Admin' | 'Clerk' | 'Viewer';
+export type Role = 'Owner' | 'Admin' | 'Manager' | 'Clerk' | 'Viewer';
 
 export type User = {
   id: string;
@@ -23,3 +23,10 @@ export type LoginResponse = {
   refreshToken?: string | null;
   user: User;
 };
+
+export interface AuthResponse {
+  accessToken: string;
+  refreshToken: string;
+  expiresAtUtc: string; 
+  user: User;
+}
