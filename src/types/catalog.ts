@@ -1,39 +1,43 @@
-export type Category = {
+// src/types/catalog.ts
+
+export interface PagedResponse<T> {
+  items: T[];
+  total: number;
+  page: number;
+  pageSize: number;
+}
+
+export interface Category {
   id: string;
   name: string;
   code: string;
-  createdAt: string;
-  updatedAt?: string;
-};
+  createdAt: string; // ISO
+}
 
-export type Uom = {
-  id: string;
-  name: string;   // e.g., "Kilogram"
-  code: string;   // e.g., "kg"
-  createdAt: string;
-  updatedAt?: string;
-};
-
-export type Product = {
+export interface UnitOfMeasure {
   id: string;
   name: string;
-  sku: string;           // must be unique per tenant
-  categoryId: string;
-  uomId: string;
+  code: string;
+  precision?: number;
   createdAt: string;
-  updatedAt?: string;
-};
+}
 
-export type Variant = {
+export interface Product {
+  id: string;
+  name: string;
+  code: string;            // required by ProductsForm/ProductsPage
+  categoryId?: string;
+  categoryName?: string;   // optional for table column
+  createdAt: string;
+}
+
+export interface Variant {
   id: string;
   productId: string;
-  name: string;
-  sku: string;           // unique per tenant
+  productName?: string;    // optional for table column
+  uomId: string;
+  uomName?: string;        // optional for table column
+  sku: string;
+  price: number;           // required by VariantsForm/VariantsPage
   createdAt: string;
-  updatedAt?: string;
-};
-
-export type PagedResponse<T> = {
-  items: T[];
-  total: number;
-};
+}

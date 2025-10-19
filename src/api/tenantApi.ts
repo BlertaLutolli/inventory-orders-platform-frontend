@@ -1,5 +1,6 @@
-import { api } from '../api';
+// import { api } from '../api';
 import { Tenant } from '../types/tenant';
+import api from "./http";
 
 export const tenantApi = {
   // Returns the list of tenants the current user can access
