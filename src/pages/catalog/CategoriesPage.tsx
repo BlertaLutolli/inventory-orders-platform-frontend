@@ -3,17 +3,14 @@ import DataTable, { Column } from '../../components/ui/DataTable';
 import Pagination from '../../components/ui/Pagination';
 import FilterBar from '../../components/ui/FilterBar';
 import Button from '../../components/ui/Button';
-import Input from '../../components/ui/Input';
 import Modal from '../../components/ui/Modal';
 import ConfirmDialog from '../../components/ui/ConfirmDialog';
-import FormRow from '../../components/ui/FormRow';
 import { categoriesApi } from '../../api/catalogApi';
 import { Category, PagedResponse } from '../../types/catalog';
 import { useHashQueryState } from '../../hooks/useHashQueryState';
 import { useAsync } from '../../hooks/useAsync';
 import { notify } from '../../utils/events';
-
-const emptyCategory: Partial<Category> = { name: '', code: '' };
+import CategoriesForm from './CategoriesForm';
 
 const CategoriesPage: React.FC = () => {
   const [q, setQ] = useHashQueryState({ search: '', page: '1', pageSize: '10', sortBy: 'name', sortDir: 'asc' });
@@ -21,10 +18,12 @@ const CategoriesPage: React.FC = () => {
   const pageSize = Number(q.pageSize || '10');
 
   const [reloadFlag, setReloadFlag] = useState(0);
-  const [editOpen, setEditOpen] = useState(false);
-  const [form, setForm] = useState<Partial<Category>>(emptyCategory);
-  const [saving, setSaving] = useState(false);
 
+  // edit/create modal state
+  const [editOpen, setEditOpen] = useState(false);
+  const [current, setCurrent] = useState<Partial<Category> | null>(null);
+
+  // delete dialog state
   const [del, setDel] = useState<{ open: boolean; id?: string; busy?: boolean }>({ open: false });
 
   const columns: Column<Category>[] = useMemo(() => ([
@@ -61,48 +60,38 @@ const CategoriesPage: React.FC = () => {
   };
 
   function openNew() {
-    setForm(emptyCategory);
+    setCurrent(null);
     setEditOpen(true);
   }
   function openEdit(r: Category) {
-    setForm({ id: r.id, name: r.name, code: r.code });
+    setCurrent({ id: r.id, name: r.name, code: r.code });
     setEditOpen(true);
   }
 
-  // optimistic create/update
-  async function save() {
-    if (!form.name || !form.code) {
-      notify({ variant: 'warning', message: 'Name and code are required.' });
-      return;
-    }
-    setSaving(true);
-    try {
-      if (form.id) {
-        const updated = await categoriesApi.update(form.id, { name: form.name, code: form.code });
-        // optimistic UI: patch local cache
-        if (data?.items) {
-          const copy = data.items.map(x => (x.id === updated.id ? updated : x));
-          (data.items as any) = copy; // quick patch; optional — reload also okay
-        }
-        notify({ variant: 'success', message: 'Category updated.' });
+  // After form submits successfully
+  async function handleSaved(saved: Category) {
+    // optimistic patch when possible; otherwise reload
+    if (data?.items) {
+      const idx = data.items.findIndex(x => x.id === saved.id);
+      if (idx >= 0) {
+        // updated
+        const copy = [...data.items];
+        copy[idx] = saved;
+        (data.items as any) = copy;
+      } else if (page === 1) {
+        // created on first page — prepend
+        (data.items as any) = [saved, ...(data.items as any)];
+        (data.total as any) = (data.total ?? 0) + 1;
       } else {
-        const created = await categoriesApi.create({ name: form.name, code: form.code });
-        // prepend to list if on first page
-        if (data?.items && page === 1) {
-          (data.items as any) = [created, ...data.items];
-          (data.total as any) = (data.total ?? 0) + 1;
-        } else {
-          // fallback: reload to see it
-          await reload();
-        }
-        notify({ variant: 'success', message: 'Category created.' });
+        await reload();
       }
-      setEditOpen(false);
-    } catch (e: any) {
-      notify({ variant: 'error', message: e?.message || 'Save failed' });
-    } finally {
-      setSaving(false);
+    } else {
+      await reload();
     }
+
+    notify({ variant: 'success', message: current?.id ? 'Category updated.' : 'Category created.' });
+    setEditOpen(false);
+    setCurrent(null);
   }
 
   async function confirmDelete() {
@@ -146,24 +135,18 @@ const CategoriesPage: React.FC = () => {
 
       <Pagination page={page} pageSize={pageSize} total={data?.total ?? 0} onChange={onPageChange} />
 
-      {/* Create/Edit modal */}
+      {/* Create/Edit modal (Formik form inside) */}
       <Modal
         open={editOpen}
-        onClose={() => setEditOpen(false)}
-        title={form.id ? 'Edit Category' : 'New Category'}
-        footer={
-          <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-            <Button onClick={() => setEditOpen(false)}>Cancel</Button>
-            <Button variant="primary" onClick={save} loading={saving}>Save</Button>
-          </div>
-        }
+        onClose={() => { setEditOpen(false); setCurrent(null); }}
+        title={current?.id ? 'Edit Category' : 'New Category'}
+        // footer is handled inside CategoriesForm now
       >
-        <div style={{ display: 'grid', gap: 12 }}>
-          <FormRow>
-            <Input label="Name" value={form.name || ''} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} />
-            <Input label="Code" value={form.code || ''} onChange={e => setForm(f => ({ ...f, code: e.target.value }))} />
-          </FormRow>
-        </div>
+        <CategoriesForm
+          existing={current}
+          onSaved={handleSaved}
+          onCancel={() => { setEditOpen(false); setCurrent(null); }}
+        />
       </Modal>
 
       {/* Delete confirm */}
