@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { LoginRequest, LoginResponse, Role, Session, User } from '../types/auth';
-import { authApi } from '../api';
+import { authApi } from '../api/authApi';
 import { clearSession as clearStored, getSession as getStored, setSession as setStored } from './sessionStore';
 
 type AuthContextShape = {
@@ -24,7 +24,8 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
 
   const login = async (cred: LoginRequest) => {
     // call backend (adjust response shape if needed)
-    const res = await authApi.login(cred.email, cred.password) as LoginResponse;
+    // const res = await authApi.login(cred.email, cred.password) as LoginResponse;
+    const res = await authApi.login(cred);
     const newSession: Session = {
       accessToken: res.accessToken,
       refreshToken: res.refreshToken ?? null,
