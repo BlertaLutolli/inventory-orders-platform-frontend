@@ -2,9 +2,9 @@ import React from 'react';
 import Button from './Button';
 
 type Props = {
-  page: number;           // 1-based
-  pageSize: number;       // e.g., 10, 25, 50
-  total: number;          // total items (from server)
+  page: number;         
+  pageSize: number;      
+  total: number;          
   onChange: (next: { page?: number; pageSize?: number }) => void;
   pageSizeOptions?: number[];
 };
